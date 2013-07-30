@@ -1,4 +1,3 @@
-puppet-bind9
-============
+# Puppet BIND9 Module
 
-BIND9 Puppet module
+Module for BIND9
