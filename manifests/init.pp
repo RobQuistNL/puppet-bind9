@@ -54,7 +54,7 @@ class bind9 (
   file { '/etc/bind':
     ensure    => directory,
     recurse   => true,
-    purge     => true,
+    purge     => false,
     source    => $configfilesfolder,
     notify => Service['bind']
   }
