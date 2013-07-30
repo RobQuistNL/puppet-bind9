@@ -26,16 +26,9 @@
 class bind9 (
   $master       = true,
   $configfilesfolder,
-  $user         = 'bind',
   ) {
 
   $bool_master=any2bool($master)
-  
-  user { $bind9::user:
-    managehome => true,
-    comment    => 'User managed by Puppet',
-    shell      => '/bin/bash',
-  }
   
   ### Managed resources
   package { 'bind9':
@@ -45,12 +38,20 @@ class bind9 (
   
   include bind9::config
   
-  service { 'bind9':
+  service { 'named':
     ensure     => running,
     hasstatus  => true,
     hasrestart => true,
     enable     => true,
     require    => Class['bind9::config']
+  }
+  
+  service { 'bind9':
+    ensure     => running,
+    hasstatus  => true,
+    hasrestart => true,
+    enable     => true,
+    require    => Service['named']
   }
   
 }
