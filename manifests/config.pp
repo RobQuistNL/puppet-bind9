@@ -1,8 +1,11 @@
 class bind9::config {
   
   file { '/etc/bind':
-    ensure => directory,
-    mode   => '0755',
+    ensure    => directory,
+    recurse   => true,
+    purge     => false,
+    source    => $bind9::configfilesfolder,
+    notify => Service['bind9']
   }
   
   file { '/etc/bind/named.conf':

@@ -32,9 +32,9 @@ class bind9 (
   $bool_master=any2bool($master)
   
   user { $bind9::user:
-    ensure  => true,
-    shell   => '/bin/false',
-    comment => 'Managed by Puppet',
+    managehome => true,
+    comment    => 'User managed by Puppet',
+    shell      => '/bin/bash',
   }
   
   ### Managed resources
@@ -42,21 +42,15 @@ class bind9 (
     ensure => $icinga::manage_package,
     name   => $icinga::package,
   }
-
+  
+  include bind9::config
+  
   service { 'bind9':
     ensure     => running,
     hasstatus  => true,
     hasrestart => true,
     enable     => true,
     require    => Class['bind9::config']
-  }
-  
-  file { '/etc/bind':
-    ensure    => directory,
-    recurse   => true,
-    purge     => false,
-    source    => $configfilesfolder,
-    notify => Service['bind']
   }
   
 }
