@@ -38,20 +38,12 @@ class bind9 (
   
   include bind9::config
   
-  service { 'named':
-    ensure     => running,
-    hasstatus  => true,
-    hasrestart => true,
-    enable     => true,
-    require    => Class['bind9::config']
-  }
-  
   service { 'bind9':
     ensure     => running,
     hasstatus  => true,
     hasrestart => true,
     enable     => true,
-    require    => Service['named']
+    require    => Class['bind9::config']
   }
   
 }

@@ -16,8 +16,33 @@ class bind9::config {
     mode    => '0644',
     owner   => 'bind',
     group   => 'bind',
-    require => [File['/etc/bind']],
+    require => File['/etc/bind'],
     notify  => Service['bind9'],
   }
-
+  
+  file { '/etc/resolv.conf':
+    ensure  => file,
+    content => "# Managed by Puppet
+nameserver 127.0.0.1",
+  }
+  
+  file { '/var/log/named':
+    ensure    => directory,
+    mode    => '0755',
+    owner   => 'bind',
+    group   => 'bind',
+    require => Package['bind9'],
+  }
+  
+  file { '/var/log/named/bind-updates.log':
+    ensure  => file,
+    mode    => '0755',
+    owner   => 'bind',
+    group   => 'bind',
+    require => File['/var/log/named'],
+    notify  => Service['bind9'],
+  }
+  
+  
+  
 }
