@@ -46,4 +46,7 @@ class bind9 (
     require    => Class['bind9::config']
   }
   
+  Package[ 'bind9' ] -> Class[ 'bind9::config' ]
+  Class[ 'bind9::config' ] -> Service[ 'bind9' ]
+  
 }

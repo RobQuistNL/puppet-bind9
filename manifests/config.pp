@@ -20,12 +20,6 @@ class bind9::config {
     notify  => Service['bind9'],
   }
   
-  file { '/etc/resolv.conf':
-    ensure  => file,
-    content => "# Managed by Puppet
-nameserver 127.0.0.1",
-  }
-  
   file { '/var/log/named':
     ensure    => directory,
     mode    => '0755',
