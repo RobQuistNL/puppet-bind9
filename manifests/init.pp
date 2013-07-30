@@ -25,7 +25,12 @@
 #
 class bind9 (
   $master       = true,
-  $configfilesfolder,
+  $bindtype    = 'master',
+  $namedconflocal,
+  $zonefolder,
+  $configfolder,
+  $masterips,
+  $slaveips,
   ) {
 
   $bool_master=any2bool($master)
@@ -36,7 +41,13 @@ class bind9 (
     name   => $icinga::package,
   }
   
-  include bind9::config
+  #include bind9::config
+  
+  class { 'bind9::config':
+    bindtype => $bindtype,
+    masterips => $masterips,
+    slaveips => $slaveips
+  }
   
   service { 'bind9':
     ensure     => running,
