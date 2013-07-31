@@ -4,6 +4,8 @@ class bind9::config (
   $masterips,
   ){
   
+  include concat::setup
+  
   if ($bindtype == 'master') {
     
     $masterslavetext = "allow-update { key \"DDNS_DHCP\"; ${slaveips} };
@@ -19,6 +21,25 @@ class bind9::config (
 	    group   => 'bind',
 	    source    => $bind9::zonefolder,
 	  }
+	  
+	  $puppetzone = '/var/lib/bind/puppet.office.zone'
+	
+	  concat{$puppetzone:
+      owner => 'bind',
+      group => 'bind',
+      mode  => '0644',
+    }
+    
+    concat::fragment{"puppet_header":
+      target => $puppetzone,
+      content => ";This file is managed by puppet\n\n",
+      order   => 01,
+    }
+    
+    Bind9::Record <<||>>
+	  
+	  File ['/var/lib/bind'] -> Concat::Fragment ["puppet_header"] 
+	  
   } else { #Create the folders but don't fill them yet
     $masterslavetext = "masters { ${masterips} };"
 
@@ -54,7 +75,7 @@ class bind9::config (
       source    => $bind9::configfolder,
       notify => Service['bind9']
   }
-  notify{"named.conf":}
+
   file { '/etc/bind/named.conf':
     ensure  => present,
     content => template('bind9/named.conf.erb'),
@@ -64,7 +85,7 @@ class bind9::config (
     require => File['/etc/bind'],
     notify  => Service['bind9'],
   }
-  notify{"named.conf.local":}
+
   file { '/etc/bind/named.conf.local':
     ensure  => present,
     content => template($bind9::namedconflocal),
@@ -91,7 +112,5 @@ class bind9::config (
     require => File['/var/log/named'],
     notify  => Service['bind9'],
   }
-  
-  
   
 }
