@@ -27,7 +27,7 @@ class bind9 (
   $master       = true,
   $bool_monitor = false,
   $bindtype    = 'master',
-  $monitor_tool = '',
+  $monitor_tool = params_lookup( 'monitor_tool' , 'global' ),
   $namedconflocal,
   $zonefolder,
   $configfolder,
@@ -68,17 +68,12 @@ class bind9 (
       tool     => $bind9::monitor_tool,
       enable   => true,
     }
-    monitor::port { "bind_named_953":
-      protocol => 'tcp',
-      port     => '953',
-      target   => $::ipaddress,
-      tool     => $bind9::monitor_tool,
-      enable   => true,
-    }
     monitor::process { 'named_process':
       process  => 'named',
       user     => 'bind',
       argument => '-u bind',
+      pidfile  => '/etc/named.pid',
+      service  => 'bind9',
       tool     => $bind9::monitor_tool,
       enable   => true,
     }
