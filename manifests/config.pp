@@ -77,7 +77,6 @@ class bind9::config (
       purge     => false,
       owner  => $bind9::config_file_owner,
       group  => $bind9::config_file_group,
-      source    => $bind9::configfolder,
       notify => Service['bind9']
   }
 
