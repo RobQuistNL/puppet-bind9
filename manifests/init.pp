@@ -43,21 +43,19 @@ class bind9 (
   $slaveips,
   $puppetzoneheader,
   $puppetzonefile,
+  $package = params_lookup('package'),
+  $config_dir = params_lookup('config_dir'),
+  $service = params_lookup ('service'),
+  $config_file_mode = params_lookup ('config_file_mode'),
+  $config_file_owner = params_lookup ('config_file_owner'),
+  $config_file_group = params_lookup ('config_file_group'),
+  $dns_port = params_lookup ('dns_port'),
+  $dns_protocol = params_lookup ('dns_protocol'),
+  $process = params_lookup ('process'),
+  $process_pidfile = params_lookup ('process_pidfile'),
+  $zonelibrary = params_lookup ('zonelibrary'),
   ) inherits bind9::params {
-  
-  # Variables defined in standard::params
-  $package=$bind9::params::package
-  $service=$bind9::params::service
-  $config_dir=$bind9::params::config_dir
-  $config_file_mode=$bind9::params::config_file_mode
-  $config_file_owner=$bind9::params::config_file_owner
-  $config_file_group=$bind9::params::config_file_group
-  $dns_port=$bind9::params::dns_port
-  $dns_protocol=$bind9::params::dns_protocol
-  $process=$bind9::params::process
-  $process_pidfile=$bind9::params::process_pidfile
-  $zonelibrary=$bind9::params::zonelibrary
-  
+    
   ### Managed resources
   package { $package:
     ensure => $icinga::manage_package,
