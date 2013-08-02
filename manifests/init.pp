@@ -38,10 +38,24 @@ class bind9 (
   $configfolder,
   $masterips,
   $slaveips,
-  ) {
+  ) inherits bind9::params {
+  
+  # Variables defined in standard::params
+  $package=$bind9::params::package
+  $service=$bind9::params::service
+  $config_file=$bind9::params::config_file
+  $config_dir=$bind9::params::config_dir
+  $config_file_mode=$bind9::params::config_file_mode
+  $config_file_owner=$bind9::params::config_file_owner
+  $config_file_group=$bind9::params::config_file_group
+  $dns_port=$bind9::params::dns_port
+  $dns_protocol=$bind9::params::dns_protocol
+  $process=$bind9::params::process
+  $process_pidfile=$bind9::params::process_pidfile
+  $zonelibrary=$bind9::params::zonelibrary
   
   ### Managed resources
-  package { 'bind9':
+  package { $package:
     ensure => $icinga::manage_package,
     name   => $icinga::package,
   }
@@ -54,7 +68,7 @@ class bind9 (
     slaveips => $slaveips
   }
   
-  service { 'bind9':
+  service { $service:
     ensure     => running,
     hasstatus  => true,
     hasrestart => true,
@@ -65,18 +79,18 @@ class bind9 (
   ### Service monitoring, if enabled ( monitor => true )
   if $bind9::bool_monitor == true {
     monitor::port { 'bind_named_53':
-      protocol => 'tcp',
-      port     => '53',
+      protocol => $dns_protocol,
+      port     => $dns_port,
       target   => $::ipaddress,
       tool     => $bind9::monitor_tool,
       enable   => true,
     }
     monitor::process { 'named_process':
-      process  => 'named',
-      user     => 'bind',
-      argument => '-u bind',
-      pidfile  => '/etc/named.pid',
-      service  => 'bind9',
+      process  => $process,
+      user     => $config_file_owner,
+      argument => "-u ${config_file_owner}",
+      pidfile  => $process_pidfile,
+      service  => $service,
       tool     => $bind9::monitor_tool,
       enable   => true,
     }
