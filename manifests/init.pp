@@ -9,13 +9,19 @@
 # Define the general class behaviour and customizations
 #
 # Make sure /etc/bind/named.conf.options and /etc/bind/named.conf.local
-# are in the configfilesfolder bind9.
+# are in the $configfolder bind9.
 #
 # [*VAR*]
 #   DESC
 #
 # == Examples
-# Configfilefolder: 'puppet:///prod-cluster/core/role/bind/bind_conf/'
+# $bool_monitor: true #Monitoring is on (port 53 and the service)
+# $bindtype: 'slave' #setup this machine as a slave server
+# $namedconflocal: local named configuration
+# $configfolder: 'puppet:///prod-cluster/core/role/nameserver/bind_conf/'
+# $zonefolder: 'puppet:///prod-cluster/core/role/nameserver/bind_conf/'
+# $masterips: '192.168.1.1;'
+# $slaveips: '192.168.3.14;192.168.3.15;'
 #
 # See README for details.
 #
@@ -24,7 +30,6 @@
 #   Rob Quist | Enrise
 #
 class bind9 (
-  $master       = true,
   $bool_monitor = false,
   $bindtype    = 'master',
   $monitor_tool = params_lookup( 'monitor_tool' , 'global' ),
@@ -34,8 +39,6 @@ class bind9 (
   $masterips,
   $slaveips,
   ) {
-
-  $bool_master=any2bool($master)
   
   ### Managed resources
   package { 'bind9':
@@ -61,7 +64,7 @@ class bind9 (
   
   ### Service monitoring, if enabled ( monitor => true )
   if $bind9::bool_monitor == true {
-    monitor::port { "bind_named_53":
+    monitor::port { 'bind_named_53':
       protocol => 'tcp',
       port     => '53',
       target   => $::ipaddress,

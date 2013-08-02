@@ -1,5 +1,19 @@
+# Bind9 configuration
+#
+# [slaveips]
+#   semicolon-seperated list of slave IP's that are allowed to connect
+#     Example: 192.168.0.1; 192.168.2.25;
+# [masterips]
+#   semicolon-seperated list of master IP's that are allowed to push
+#   and where should be pulled from
+#     Example: 192.168.0.4;
+# [bindtype]
+#  String - 'master' or 'slave'
+#   Sets the type of the bind9 service. In case of slave, the 
+#   zone files are not copied. 
+
 class bind9::config (
-  $bindtype    = 'notset',
+  $bindtype,
   $slaveips,
   $masterips,
   ){
@@ -30,7 +44,7 @@ class bind9::config (
       mode  => '0644',
     }
     
-    concat::fragment{"puppet_header":
+    concat::fragment{'puppet_header':
       target => $puppetzone,
       content => ";This file is managed by puppet\n\n",
       order   => 01,
@@ -38,7 +52,7 @@ class bind9::config (
     
     Bind9::Record <<||>>
 	  
-	  File ['/var/lib/bind'] -> Concat::Fragment ["puppet_header"] 
+	  File ['/var/lib/bind'] -> Concat::Fragment ['puppet_header'] 
 	  
   } else { #Create the folders but don't fill them yet
     $masterslavetext = "masters { ${masterips} };"
