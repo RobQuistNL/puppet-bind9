@@ -39,10 +39,6 @@ class bind9::params {
     default => '/var/lib/bind',
   }
 
-  $config_file = $::operatingsystem ? {
-    default => '/etc/bind/standard.conf',
-  }
-
   $config_file_mode = $::operatingsystem ? {
     default => '0644',
   }

@@ -22,6 +22,7 @@
 # $zonefolder: 'puppet:///prod-cluster/core/role/nameserver/bind_conf/'
 # $masterips: '192.168.1.1;'
 # $slaveips: '192.168.3.14;192.168.3.15;'
+# $puppetzoneheadertemplate: The prefix for the automated shared resources file. e.g.: template('example.com.zone')
 #
 # See README for details.
 #
@@ -34,16 +35,19 @@ class bind9 (
   $bindtype    = 'master',
   $monitor_tool = params_lookup( 'monitor_tool' , 'global' ),
   $namedconflocal,
+  $namedconfoptions,
+  $rndckey,
   $zonefolder,
   $configfolder,
   $masterips,
   $slaveips,
+  $puppetzoneheader,
+  $puppetzonefile,
   ) inherits bind9::params {
   
   # Variables defined in standard::params
   $package=$bind9::params::package
   $service=$bind9::params::service
-  $config_file=$bind9::params::config_file
   $config_dir=$bind9::params::config_dir
   $config_file_mode=$bind9::params::config_file_mode
   $config_file_owner=$bind9::params::config_file_owner

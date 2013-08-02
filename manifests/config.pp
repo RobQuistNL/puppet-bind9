@@ -20,66 +20,57 @@ class bind9::config (
   
   include concat::setup
   
+  # Create all the needed folders
+  file { $bind9::zonelibrary:
+    ensure => directory,
+    owner  => $bind9::config_file_owner,
+    group  => $bind9::config_file_group,
+  }
+  
+  file { "${bind9::zonelibrary}/zones":
+    ensure => directory,
+    owner  => $bind9::config_file_owner,
+    group  => $bind9::config_file_group,
+  }
+  
+  file { "${bind9::zonelibrary}/zones/rev":
+    ensure => directory,
+    owner  => $bind9::config_file_owner,
+    group  => $bind9::config_file_group,
+  }
+  
+  File [$bind9::zonelibrary] -> File["${bind9::zonelibrary}/zones"]
+  File ["${bind9::zonelibrary}/zones"] -> File["${bind9::zonelibrary}/zones/rev"]
+  
+  # Now for master / slave specific code
   if ($bindtype == 'master') {
     
     $masterslavetext = "allow-update { key \"DDNS_DHCP\"; ${slaveips} };
     allow-transfer { ${slaveips} };
     also-notify { ${slaveips} };
     notify yes;"
-
-	  file { $bind9::zonelibrary:
-	    ensure  => directory,
-	    recurse => true,
-	    purge   => false,
-	    owner   => $bind9::config_file_owner,
-	    group   => $bind9::config_file_group,
-	    source  => $bind9::zonefolder,
-	  }
 	  
-	  $puppetzone = "${bind9::zonelibrary}/puppet.office.zone"
+	  $puppetzone = "${bind9::zonelibrary}/${bind9::puppetzonefile}"
 	
-	  concat{$puppetzone:
+	  concat{$bind9::puppetzonefile:
       owner => $bind9::config_file_owner,
       group => $bind9::config_file_group,
       mode  => $bind9::config_file_mode,
     }
     
-    concat::fragment{'puppet_header':
-      target  => $puppetzone,
-      content => ";This file is managed by puppet\n\n",
+    concat::fragment { 'puppet_header':
+      target  => $bind9::puppetzonefile,
+      content => $bind9::puppetzoneheader,
       order   => 01,
     }
     
     Bind9::Record <<||>>
 	  
-	  File [$bind9::zonelibrary] -> Concat::Fragment ['puppet_header'] 
-	  
-  } else { #Create the folders but don't fill them yet
+  } else {
     $masterslavetext = "masters { ${masterips} };"
-
-    file { $bind9::zonelibrary:
-      ensure => directory,
-      owner  => $bind9::config_file_owner,
-      group  => $bind9::config_file_group,
-    }
-    
-    file { "${bind9::zonelibrary}/common":
-      ensure => directory,
-      owner  => $bind9::config_file_owner,
-      group  => $bind9::config_file_group,
-    }
-    
-    file { "${bind9::zonelibrary}/internal":
-      ensure => directory,
-      owner  => $bind9::config_file_owner,
-      group  => $bind9::config_file_group,
-    }
-    
-    File [$bind9::zonelibrary] -> File["${bind9::zonelibrary}/common"]
-    File ["${bind9::zonelibrary}/common"] -> File["${bind9::zonelibrary}/internal"]
-    
   }
-
+  
+  # Make all the configuration
   file { $bind9::config_dir:
       ensure    => directory,
       recurse   => true,
@@ -103,6 +94,26 @@ class bind9::config (
   file { "${bind9::config_dir}/named.conf.local":
     ensure  => present,
     content => template($bind9::namedconflocal),
+    mode    => '0644',
+    owner  => $bind9::config_file_owner,
+    group  => $bind9::config_file_group,
+    require => File[$bind9::config_dir],
+    notify  => Service[$bind9::service],
+  }
+  
+  file { "${bind9::config_dir}/named.conf.options":
+    ensure  => present,
+    content => template($bind9::namedconfoptions),
+    mode    => '0644',
+    owner  => $bind9::config_file_owner,
+    group  => $bind9::config_file_group,
+    require => File[$bind9::config_dir],
+    notify  => Service[$bind9::service],
+  }
+  
+  file { "${bind9::config_dir}/rndc.key":
+    ensure  => present,
+    content => template($bind9::rndckey),
     mode    => '0644',
     owner  => $bind9::config_file_owner,
     group  => $bind9::config_file_group,
